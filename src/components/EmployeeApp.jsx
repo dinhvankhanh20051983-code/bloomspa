@@ -4,41 +4,53 @@ import EmpSalary from './EmpSalary';
 import EmpShares from './EmpShares';
 import ChatRoom from './ChatRoom';
 
-function EmployeeApp({ user, onLogout }) {
-  const [page, setPage] = useState("appts");
+export default function EmployeeApp() {
+  const [activeTab, setActiveTab] = useState('appts');
 
-  const renderPage = () => {
-    switch (page) {
-      case "appts": return <EmpAppts user={user} />;
-      case "salary": return <EmpSalary user={user} />;
-      case "shares": return <EmpShares user={user} />;
-      case "chat": return <ChatRoom roomId={`owner_emp_\( {user.id}`} myId={`emp_ \){user.id}`} myName={user.name} partnerName="Chủ tiệm" />;
-      default: return <EmpAppts user={user} />;
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'appts': return <EmpAppts />;
+      case 'salary': return <EmpSalary />;
+      case 'shares': return <EmpShares />;
+      case 'chat': return <ChatRoom currentUser="employee" />;
+      default: return <EmpAppts />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f6f9]">
-      <div className="bg-white border-b px-4 py-3 flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50">
+      {/* Top bar */}
+      <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">💆‍♀️</span>
-          <div className="font-bold">{user.name}</div>
+          <span className="text-2xl">🧴</span>
+          <div>
+            <div className="font-bold">BloomSpa</div>
+            <div className="text-xs opacity-75">Nhân viên</div>
+          </div>
         </div>
-        <button onClick={onLogout} className="text-red-500 text-sm">Đăng xuất</button>
+        <button className="text-white/80 hover:text-white">Đăng xuất</button>
       </div>
 
-      <div className="pb-24">
-        {renderPage()}
+      {/* Main content */}
+      <div className="min-h-[calc(100vh-64px)]">
+        {renderContent()}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t max-w-[480px] mx-auto grid grid-cols-4 text-xs">
-        <button onClick={() => setPage("appts")} className={`py-3 ${page === "appts" ? "text-[#7c5cbf]" : ""}`}>📅 Lịch</button>
-        <button onClick={() => setPage("salary")} className={`py-3 ${page === "salary" ? "text-[#7c5cbf]" : ""}`}>💰 Lương</button>
-        <button onClick={() => setPage("shares")} className={`py-3 ${page === "shares" ? "text-[#7c5cbf]" : ""}`}>🏅 Cổ phần</button>
-        <button onClick={() => setPage("chat")} className={`py-3 ${page === "chat" ? "text-[#7c5cbf]" : ""}`}>💬 Chat</button>
+      {/* Bottom navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg grid grid-cols-4 text-xs py-2">
+        <button onClick={() => setActiveTab('appts')} className={`flex flex-col items-center ${activeTab === 'appts' ? 'text-blue-600' : 'text-gray-400'}`}>
+          📅<span className="mt-1">Lịch hẹn</span>
+        </button>
+        <button onClick={() => setActiveTab('salary')} className={`flex flex-col items-center ${activeTab === 'salary' ? 'text-blue-600' : 'text-gray-400'}`}>
+          💰<span className="mt-1">Lương</span>
+        </button>
+        <button onClick={() => setActiveTab('shares')} className={`flex flex-col items-center ${activeTab === 'shares' ? 'text-blue-600' : 'text-gray-400'}`}>
+          🏆<span className="mt-1">Thưởng</span>
+        </button>
+        <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center ${activeTab === 'chat' ? 'text-blue-600' : 'text-gray-400'}`}>
+          💬<span className="mt-1">Chat</span>
+        </button>
       </div>
     </div>
   );
 }
-
-export default EmployeeApp;

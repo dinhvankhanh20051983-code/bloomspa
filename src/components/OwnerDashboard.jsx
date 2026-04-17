@@ -1,60 +1,107 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient.js';
+import { Calendar, Users, DollarSign, Package, TrendingUp } from 'lucide-react';
 
-function OwnerDashboard() {
+export default function OwnerDashboard() {
   const [stats, setStats] = useState({
-    revenue: 0,
-    customers: 0,
-    appointments: 0,
-    todayAppts: 0
+    todayRevenue: 0,
+    totalCustomers: 0,
+    todayAppointments: 0,
+    totalPackagesSold: 0
   });
 
   useEffect(() => {
-    const loadStats = async () => {
-      // Doanh thu hôm nay
-      const { data: tx } = await supabase.from('finance_transactions').select('amount').gte('date', new Date().toISOString().split('T')[0]);
-      const revenue = tx ? tx.reduce((sum, t) => sum + t.amount, 0) : 0;
-
-      // Số khách
-      const { count: custCount } = await supabase.from('customers').select('*', { count: 'exact', head: true });
-      // Số lịch hẹn hôm nay
-      const today = new Date().toISOString().split('T')[0];
-      const { count: apptCount } = await supabase.from('appointments').select('*', { count: 'exact', head: true }).eq('date', today);
-
-      setStats({
-        revenue,
-        customers: custCount || 0,
-        appointments: 12,
-        todayAppts: apptCount || 0
-      });
-    };
-    loadStats();
+    fetchDashboardStats();
   }, []);
 
-  return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-6">🌸 Dashboard Chủ Tiệm</h2>
+  const fetchDashboardStats = async () => {
+    // Doanh thu hôm nay
+    const { data: revenueData } = await supabase
+      .from('finance_transactions')
+      .select('amount')
+      .eq('type', 'income')
+      .gte('created_at', new Date().toISOString().split('T')[0]);
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gradient-to-br from-[#7c5cbf] to-[#5a3d9e] text-white rounded-3xl p-6">
-          <div className="text-sm opacity-75">Doanh thu hôm nay</div>
-          <div className="text-4xl font-bold mt-2">{stats.revenue.toLocaleString('vi-VN')}đ</div>
+    const todayRevenue = revenueData ? revenueData.reduce((sum, t) => sum + t.amount, 0) : 0;
+
+    // Tổng khách hàng
+    const { count: custCount } = await supabase
+      .from('customers')
+      .select('*', { count: 'exact' });
+
+    // Lịch hẹn hôm nay
+    const { count: apptCount } = await supabase
+      .from('appointments')
+      .select('*', { count: 'exact' })
+      .eq('date', new Date().toISOString().split('T')[0]);
+
+    setStats({
+      todayRevenue,
+      totalCustomers: custCount || 0,
+      todayAppointments: apptCount || 0,
+      totalPackagesSold: 12 // demo
+    });
+  };
+
+  return (
+    <div className="p-6">
+      <h1 className="text-4xl font-bold text-purple-700 mb-8">Dashboard Chủ Tiệm</h1>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {/* Doanh thu hôm nay */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Doanh thu hôm nay</p>
+              <p className="text-4xl font-bold text-green-600 mt-2">
+                {stats.todayRevenue.toLocaleString('vi-VN')}đ
+              </p>
+            </div>
+            <DollarSign className="w-12 h-12 text-green-500" />
+          </div>
         </div>
-        <div className="bg-white rounded-3xl p-6 shadow">
-          <div className="text-sm text-gray-500">Khách hàng</div>
-          <div className="text-4xl font-bold text-[#7c5cbf] mt-2">{stats.customers}</div>
+
+        {/* Khách hàng */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Tổng khách hàng</p>
+              <p className="text-4xl font-bold text-blue-600 mt-2">{stats.totalCustomers}</p>
+            </div>
+            <Users className="w-12 h-12 text-blue-500" />
+          </div>
         </div>
-        <div className="bg-white rounded-3xl p-6 shadow">
-          <div className="text-sm text-gray-500">Lịch hẹn hôm nay</div>
-          <div className="text-4xl font-bold text-[#7c5cbf] mt-2">{stats.todayAppts}</div>
+
+        {/* Lịch hẹn hôm nay */}
+        <div className="bg-white rounded-3xl p-6 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Lịch hẹn hôm nay</p>
+              <p className="text-4xl font-bold text-purple-600 mt-2">{stats.todayAppointments}</p>
+            </div>
+            <Calendar className="w-12 h-12 text-purple-500" />
+          </div>
         </div>
-        <div className="bg-white rounded-3xl p-6 shadow">
-          <div className="text-sm text-gray-500">Tổng lịch hẹn</div>
-          <div className="text-4xl font-bold text-[#7c5cbf] mt-2">{stats.appointments}</div>
+
+        {/* Gói đã bán */}
+<div className="bg-white rounded-3xl p-6 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Gói dịch vụ đã bán</p>
+              <p className="text-4xl font-bold text-amber-600 mt-2">{stats.totalPackagesSold}</p>
+            </div>
+            <Package className="w-12 h-12 text-amber-500" />
+          </div>
         </div>
+      </div>
+
+      <div className="mt-10 bg-white rounded-3xl p-8 shadow">
+        <h2 className="text-xl font-semibold mb-6 flex items-center gap-3">
+          <TrendingUp className="w-6 h-6" />
+          Hoạt động gần đây
+        </h2>
+        <p className="text-gray-400 text-center py-12">Dữ liệu hoạt động sẽ hiển thị ở đây sau khi có giao dịch</p>
       </div>
     </div>
   );
 }
-
-export default OwnerDashboard;

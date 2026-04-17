@@ -1,51 +1,58 @@
 import { useState } from 'react';
 import CustHome from './CustHome';
 import CustAppts from './CustAppts';
-import CustomerTreatmentHistory from './CustomerTreatmentHistory';
 import CustShop from './CustShop';
 import CustRefer from './CustRefer';
 import CustShares from './CustShares';
-import CustLoyalty from './CustLoyalty';
 import CustChat from './CustChat';
+import CustLoyalty from './CustLoyalty';
+import TreatmentHistoryViewer from './TreatmentHistoryViewer';
 import FeedbackForm from './FeedbackForm';
 
-function CustomerApp({ user, onLogout }) {
-  const [page, setPage] = useState("home");
+export default function CustomerApp() {
+  const [activeTab, setActiveTab] = useState('home');
 
-  const renderPage = () => {
-    switch (page) {
-      case "home": return <CustHome user={user} />;
-      case "appts": return <CustAppts user={user} />;
-      case "history": return <CustomerTreatmentHistory user={user} />;
-      case "shop": return <CustShop user={user} />;
-      case "refer": return <CustRefer user={user} />;
-      case "shares": return <CustShares user={user} />;
-      case "loyalty": return <CustLoyalty user={user} />;
-      case "chat": return <CustChat user={user} />;
-      default: return <CustHome user={user} />;
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'home': return <CustHome />;
+      case 'appts': return <CustAppts />;
+      case 'shop': return <CustShop />;
+      case 'refer': return <CustRefer />;
+      case 'shares': return <CustShares />;
+      case 'loyalty': return <CustLoyalty />;
+      case 'history': return <TreatmentHistoryViewer />;
+      case 'chat': return <CustChat />;
+      case 'feedback': return <FeedbackForm />;
+      default: return <CustHome />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f6f9]">
-      <div className="bg-white border-b px-4 py-3 flex justify-between items-center">
-        <div className="font-bold text-lg">🌸 {user.name}</div>
-        <button onClick={onLogout} className="text-red-500 text-sm">Đăng xuất</button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Top bar */}
+      <div className="bg-pink-600 text-white p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🌺</span>
+          <div>
+            <div className="font-bold">BloomSpa</div>
+            <div className="text-xs opacity-75">Khách hàng</div>
+          </div>
+        </div>
+        <button className="text-white/80 hover:text-white">Đăng xuất</button>
       </div>
 
-      <div className="pb-24">
-        {renderPage()}
+      <div className="min-h-[calc(100vh-64px)] pb-20">
+        {renderContent()}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t max-w-[480px] mx-auto grid grid-cols-5 text-xs">
-        <button onClick={() => setPage("home")} className={`py-3 ${page === "home" ? "text-[#7c5cbf]" : ""}`}>🏠</button>
-        <button onClick={() => setPage("appts")} className={`py-3 ${page === "appts" ? "text-[#7c5cbf]" : ""}`}>📅</button>
-        <button onClick={() => setPage("history")} className={`py-3 ${page === "history" ? "text-[#7c5cbf]" : ""}`}>📋</button>
-        <button onClick={() => setPage("shop")} className={`py-3 ${page === "shop" ? "text-[#7c5cbf]" : ""}`}>🛒</button>
-        <button onClick={() => setPage("loyalty")} className={`py-3 ${page === "loyalty" ? "text-[#7c5cbf]" : ""}`}>🎟️</button>
+      {/* Bottom navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg grid grid-cols-5 text-xs py-2">
+        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center ${activeTab === 'home' ? 'text-pink-600' : 'text-gray-400'}`}>🏠<span className="mt-1">Trang chủ</span></button>
+        <button onClick={() => setActiveTab('appts')} className={`flex flex-col items-center ${activeTab === 'appts' ? 'text-pink-600' : 'text-gray-400'}`}>📅<span className="mt-1">Lịch hẹn</span></button>
+        <button onClick={() => setActiveTab('shop')} className={`flex flex-col items-center ${activeTab === 'shop' ? 'text-pink-600' : 'text-gray-400'}`}>🛒<span className="mt-1">Cửa hàng</span></button>
+        <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center ${activeTab === 'chat' ? 'text-pink-600' : 'text-gray-400'}`}>💬<span className="mt-1">Chat</span></button>
+        <button onClick={() => setActiveTab('loyalty')} className={`flex flex-col items-center ${activeTab === 'loyalty' ? 'text-pink-600' : 'text-gray-400'}`}>🎁<span className="mt-1">Thưởng</span></button>
       </div>
     </div>
   );
 }
-
-export default CustomerApp;

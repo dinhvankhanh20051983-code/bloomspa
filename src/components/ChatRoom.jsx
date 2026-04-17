@@ -1,70 +1,94 @@
 import { useState, useEffect, useRef } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabaseClient.js';
+import { Send, MessageCircle } from 'lucide-react';
 
-function ChatRoom({ roomId, myId, myName, partnerName, onClose }) {
+export default function ChatRoom({ roomId = 'owner_cust_1', currentUser = 'customer' }) {
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState("");
-  const endRef = useRef(null);
+  const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    const loadMessages = async () => {
-      const { data } = await supabase.from('chats').select('*').eq('room_id', roomId).order('time', { ascending: true });
-      setMessages(data || []);
-    };
-    loadMessages();
-  }, [roomId]);
-
-  useEffect(() => {
-    const channel = supabase.channel(`chat:${roomId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats', filter: `room_id=eq.${roomId}` }, payload => {
-        setMessages(prev => [...prev, payload.new]);
-      })
+    fetchMessages();
+    const channel = supabase
+      .channel(`chat-${roomId}`)
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'chats',
+        filter: `room_id=eq.${roomId}`
+      }, fetchMessages)
       .subscribe();
+
     return () => supabase.removeChannel(channel);
   }, [roomId]);
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('chats')
+      .select('*')
+      .eq('room_id', roomId)
+      .order('created_at', { ascending: true });
 
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
-    await supabase.from('chats').insert({
-      room_id: roomId,
-      from_type: myId.includes("owner") ? "owner" : "customer",
-      from_id: myId,
-      from_name: myName,
-      text: newMessage.trim(),
-      time: new Date().toISOString()
-    });
-    setNewMessage("");
+    if (error) console.error(error);
+    else setMessages(data || []);
   };
 
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    const { error } = await supabase
+      .from('chats')
+      .insert([{
+        room_id: roomId,
+        sender: currentUser,
+        message: newMessage.trim()
+      }]);
+
+    if (error) alert('Lỗi gửi tin nhắn');
+    else {
+      setNewMessage('');
+      fetchMessages();
+    }
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   return (
-    <div className="flex flex-col h-screen bg-[#f4f6f9]">
-      <div className="bg-gradient-to-r from-[#7c5cbf] to-[#5a3d9e] text-white px-4 py-4 flex items-center gap-3">
-        {onClose && <button onClick={onClose} className="text-3xl">←</button>}
-        <div className="flex-1 font-bold text-lg">{partnerName}</div>
+    <div className="flex flex-col h-full bg-gray-50">
+      <div className="bg-purple-700 text-white p-4 flex items-center gap-3">
+        <MessageCircle className="w-6 h-6" />
+        <div className="font-semibold">Chat trực tiếp</div>
       </div>
-      <div className="flex-1 overflow-auto p-4 space-y-4">
-        {messages.map(msg => {
-          const isMe = msg.from_id === myId;
-          return (
-            <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[78%] px-5 py-3 rounded-3xl ${isMe ? "bg-[#7c5cbf] text-white" : "bg-white shadow-sm"}`}>
-                <div>{msg.text}</div>
-              </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg) => (
+          <div key={msg.id} className={`flex ${msg.sender === currentUser ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[75%] px-5 py-3 rounded-3xl ${msg.sender === currentUser ? 'bg-purple-600 text-white rounded-br-none' : 'bg-gray-100 rounded-bl-none'}`}>
+              <p>{msg.message}</p>
+              <p className="text-xs opacity-70 text-right mt-1">
+                {new Date(msg.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+              </p>
             </div>
-          );
-        })}
-        <div ref={endRef} />
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
-      <div className="p-4 bg-white border-t flex gap-3">
-        <input value={newMessage} onChange={e => setNewMessage(e.target.value)} onKeyDown={e => e.key === "Enter" && sendMessage()} placeholder="Nhập tin nhắn..." className="flex-1 border rounded-3xl px-6 py-4" />
-        <button onClick={sendMessage} className="bg-[#7c5cbf] text-white w-12 h-12 rounded-3xl">➤</button>
-      </div>
+
+      <form onSubmit={sendMessage} className="p-4 border-t bg-white flex gap-3">
+        <input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Nhập tin nhắn..."
+          className="flex-1 px-5 py-4 bg-gray-100 rounded-3xl focus:outline-none focus:bg-white"
+        />
+        <button type="submit" className="bg-purple-600 text-white w-14 h-14 rounded-3xl flex items-center justify-center">
+<Send className="w-6 h-6" />
+        </button>
+      </form>
     </div>
   );
 }
-
-export default ChatRoom;

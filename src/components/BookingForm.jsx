@@ -1,129 +1,145 @@
-import { useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabaseClient.js';
+import { Calendar, Clock, User, Check } from 'lucide-react';
 
-function BookingForm({ user, onClose }) {
-  const [pkgId, setPkgId] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [note, setNote] = useState("");
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
+export default function BookingForm({ onClose, onSuccess }) {
+  const [services, setServices] = useState([]);
+  const [selectedService, setSelectedService] = useState('');
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!pkgId || !date || !time) {
-      setError("Vui lòng chọn gói, ngày và giờ");
-      return;
-    }
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
-    const { error: insertError } = await supabase.from('booking_requests').insert({
-      cust_id: user.id,
-      cust_name: user.name,
-      cust_phone: user.phone,
-      pkg_id: Number(pkgId),
-      date,
-      time,
-      note,
-      status: "waiting",
-      created_at: new Date().toISOString()
-    });
-
-    if (insertError) {
-      setError("Có lỗi khi gửi yêu cầu. Vui lòng thử lại.");
-      return;
-    }
-
-    setSent(true);
+  const fetchServices = async () => {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .order('name');
+    if (error) console.error(error);
+    else setServices(data || []);
   };
 
-  if (sent) {
-    return (
-      <div className="p-8 text-center">
-        <div className="text-6xl mb-6">✅</div>
-        <h3 className="text-2xl font-bold mb-3">Yêu cầu đặt lịch đã gửi!</h3>
-        <p className="text-gray-600">Chủ spa sẽ xem xét và xác nhận trong thời gian sớm nhất.</p>
-        <button onClick={onClose} className="mt-8 w-full py-4 bg-[#7c5cbf] text-white rounded-3xl font-semibold">Đóng</button>
-      </div>
-    );
-  }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const { error } = await supabase
+      .from('appointments')
+      .insert([{
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        service_id: selectedService,
+        date: date,
+        time: time,
+        status: 'pending'
+      }]);
+
+    setLoading(false);
+
+    if (error) {
+      alert('Lỗi đặt lịch: ' + error.message);
+    } else {
+      alert('✅ Đặt lịch thành công!');
+      onSuccess?.();
+      onClose?.();
+    }
+  };
 
   return (
-    <div className="p-4">
-      <div className="flex items-center gap-4 mb-6">
-        <button onClick={onClose} className="text-2xl">←</button>
-        <h2 className="text-2xl font-bold">📅 Đặt lịch hẹn mới</h2>
-      </div>
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] overflow-auto">
+        <div className="p-6 border-b">
+          <h2 className="text-2xl font-bold text-purple-700 flex items-center gap-3">
+            <Calendar className="w-7 h-7" />
+            Đặt lịch hẹn mới
+          </h2>
+        </div>
 
-      {/* Chọn gói */}
-      <div className="mb-8">
-        <label className="block text-sm font-medium mb-3">Chọn gói dịch vụ</label>
-        <div className="space-y-3">
-          {[
-            { id: 1, name: "Massage Toàn Thân", emoji: "💆", price: 450000 },
-            { id: 2, name: "Chăm Sóc Da Mặt", emoji: "✨", price: 350000 },
-            { id: 3, name: "Trị Liệu Vai Gáy", emoji: "🌿", price: 280000 }
-          ].map(pkg => (
-            <div
-              key={pkg.id}
-              onClick={() => setPkgId(pkg.id)}
-              className={`p-4 rounded-3xl border-2 flex justify-between items-center cursor-pointer ${pkgId === pkg.id ? 'border-[#7c5cbf] bg-[#faf5ff]' : 'border-gray-200'}`}
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div>
+            <label className="block text-sm font-medium mb-2">Dịch vụ</label>
+            <select
+              value={selectedService}
+              onChange={(e) => setSelectedService(e.target.value)}
+              className="w-full px-4 py-4 border border-gray-200 rounded-3xl focus:border-purple-400"
+              required
             >
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{pkg.emoji}</span>
-                <div>
-                  <div className="font-semibold">{pkg.name}</div>
-                  <div className="text-sm text-gray-500">{pkg.price.toLocaleString('vi-VN')}đ</div>
-                </div>
-              </div>
-              {pkgId === pkg.id && <span className="text-[#7c5cbf] text-2xl">✓</span>}
+              <option value="">Chọn dịch vụ...</option>
+              {services.map(s => (
+                <option key={s.id} value={s.id}>{s.name} - {s.price.toLocaleString('vi-VN')}đ</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Ngày</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full px-4 py-4 border border-gray-200 rounded-3xl"
+                required
+              />
             </div>
-          ))}
-        </div>
+            <div>
+<label className="block text-sm font-medium mb-2">Giờ</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full px-4 py-4 border border-gray-200 rounded-3xl"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Họ tên khách hàng</label>
+            <input
+              type="text"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              className="w-full px-4 py-4 border border-gray-200 rounded-3xl"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Số điện thoại</label>
+            <input
+              type="tel"
+              value={customerPhone}
+              onChange={(e) => setCustomerPhone(e.target.value)}
+              className="w-full px-4 py-4 border border-gray-200 rounded-3xl"
+              required
+            />
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-4 text-gray-600 bg-gray-100 rounded-3xl font-medium"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-4 bg-purple-600 text-white rounded-3xl font-medium flex items-center justify-center gap-2"
+            >
+              {loading ? 'Đang đặt...' : 'Đặt lịch ngay'}
+              <Check className="w-5 h-5" />
+            </button>
+          </div>
+        </form>
       </div>
-
-      {/* Ngày & Giờ */}
-<div className="grid grid-cols-2 gap-4 mb-8">
-        <div>
-          <label className="block text-sm font-medium mb-2">Ngày</label>
-          <input
-            type="date"
-            value={date}
-            onChange={e => setDate(e.target.value)}
-            className="w-full p-4 border rounded-3xl"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-2">Giờ</label>
-          <input
-            type="time"
-            value={time}
-            onChange={e => setTime(e.target.value)}
-            className="w-full p-4 border rounded-3xl"
-          />
-        </div>
-      </div>
-
-      {/* Ghi chú */}
-      <div className="mb-8">
-        <label className="block text-sm font-medium mb-2">Ghi chú (tuỳ chọn)</label>
-        <textarea
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          rows="3"
-          placeholder="Yêu cầu đặc biệt, dị ứng..."
-          className="w-full p-4 border rounded-3xl"
-        />
-      </div>
-
-      {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
-
-      <button
-        onClick={handleSubmit}
-        className="w-full py-5 bg-[#7c5cbf] text-white rounded-3xl font-semibold text-lg"
-      >
-        📨 Gửi yêu cầu đặt lịch
-      </button>
     </div>
   );
 }
-
-export default BookingForm;

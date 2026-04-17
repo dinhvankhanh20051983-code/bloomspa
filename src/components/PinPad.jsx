@@ -1,50 +1,62 @@
 import { useState } from 'react';
+import { Lock } from 'lucide-react';
 
-function PinPad({ phone, role, onSuccess, onBack }) {
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
+export default function PinPad({ onPinCorrect }) {
+  const [pin, setPin] = useState('');
 
-  const addDigit = (digit) => {
-    if (pin.length < 4) setPin(pin + digit);
+  const handleNumber = (num) => {
+    if (pin.length < 4) setPin(pin + num);
   };
 
-  const clearPin = () => setPin("");
+  const handleDelete = () => {
+    setPin(pin.slice(0, -1));
+  };
 
-  const verifyPin = () => {
-    // Demo PIN: 1234 cho tất cả user
-    if (pin === "1234") {
-      onSuccess({
-        id: role === 'employee' ? 'emp1' : 'cust1',
-        name: role === 'employee' ? 'Nguyễn Thị Lan' : 'Trần Văn Minh',
-        phone: phone,
-        role: role
-      });
+  const handleSubmit = () => {
+    if (pin === '1234') { // Demo PIN
+      onPinCorrect();
     } else {
-      setError("PIN không đúng");
-      setTimeout(() => { setError(""); clearPin(); }, 1500);
+      alert('PIN sai! Demo: 1234');
+      setPin('');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#7c5cbf] to-[#5a3d9e] flex items-center justify-center p-6">
-      <div className="max-w-[420px] w-full bg-white rounded-3xl shadow-2xl p-8">
-        <button onClick={onBack} className="text-3xl mb-6">←</button>
-        <h2 className="text-2xl font-bold text-center mb-2">Nhập PIN</h2>
-        <p className="text-center text-gray-500 mb-8">{phone}</p>
-
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {[1,2,3,4,5,6,7,8,9].map(num => (
-            <button key={num} onClick={() => addDigit(num)} className="h-16 text-3xl font-semibold bg-gray-100 rounded-2xl hover:bg-gray-200">{num}</button>
-          ))}
-          <button onClick={clearPin} className="h-16 text-2xl font-semibold bg-gray-100 rounded-2xl">Xóa</button>
-          <button onClick={() => addDigit(0)} className="h-16 text-3xl font-semibold bg-gray-100 rounded-2xl">0</button>
-          <button onClick={verifyPin} className="h-16 text-3xl font-semibold bg-[#7c5cbf] text-white rounded-2xl">✓</button>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-6">
+      <div className="max-w-xs w-full bg-white rounded-3xl shadow-2xl p-8">
+        <div className="text-center mb-8">
+          <Lock className="w-12 h-12 text-purple-600 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-purple-700">Nhập PIN</h1>
+          <div className="mt-6 flex justify-center gap-3">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className={`w-8 h-8 rounded-2xl border-2 flex items-center justify-center text-2xl font-light ${pin.length > i ? 'border-purple-600 bg-purple-100' : 'border-gray-200'}`}
+              >
+                {pin.length > i ? '•' : ''}
+              </div>
+            ))}
+          </div>
         </div>
 
-        {error && <p className="text-red-500 text-center">{error}</p>}
+        {/* Bàn phím PIN */}
+        <div className="grid grid-cols-3 gap-4 text-3xl font-light">
+          {[1,2,3,4,5,6,7,8,9].map(num => (
+            <button
+              key={num}
+              onClick={() => handleNumber(num)}
+              className="h-16 bg-gray-100 hover:bg-gray-200 rounded-3xl transition active:scale-95"
+            >
+              {num}
+            </button>
+          ))}
+          <button onClick={handleDelete} className="h-16 bg-gray-100 hover:bg-red-100 text-red-500 rounded-3xl transition active:scale-95 text-2xl">⌫</button>
+          <button onClick={() => handleNumber(0)} className="h-16 bg-gray-100 hover:bg-gray-200 rounded-3xl transition active:scale-95">0</button>
+          <button onClick={handleSubmit} className="h-16 bg-purple-600 text-white rounded-3xl transition active:scale-95">OK</button>
+        </div>
+
+        <p className="text-center text-xs text-gray-400 mt-8">Demo PIN: 1234</p>
       </div>
     </div>
   );
 }
-
-export default PinPad;

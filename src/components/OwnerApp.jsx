@@ -1,67 +1,73 @@
 import { useState } from 'react';
 import OwnerDashboard from './OwnerDashboard';
 import OwnerAppointmentManager from './OwnerAppointmentManager';
+import OwnerCustomers from './OwnerCustomers';
 import OwnerInventory from './OwnerInventory';
 import OwnerFinance from './OwnerFinance';
-import OwnerReminders from './OwnerReminders';
-import OwnerPackages from './OwnerPackages';
-import OwnerEmployees from './OwnerEmployees';
-import OwnerCustomers from './OwnerCustomers';
 import OwnerReports from './OwnerReports';
+import OwnerEmployees from './OwnerEmployees';
+import OwnerPackages from './OwnerPackages';
 import OwnerSettings from './OwnerSettings';
+import OwnerReminders from './OwnerReminders';
 import ChatRoom from './ChatRoom';
 
-function OwnerApp({ user, onLogout }) {
-  const [page, setPage] = useState("dashboard");
+export default function OwnerApp() {
+  const [activeTab, setActiveTab] = useState('dashboard');
 
-  const renderPage = () => {
-    switch (page) {
-      case "dashboard": return <OwnerDashboard />;
-      case "appointments": return <OwnerAppointmentManager />;
-      case "inventory": return <OwnerInventory />;
-      case "finance": return <OwnerFinance />;
-      case "reminders": return <OwnerReminders />;
-      case "packages": return <OwnerPackages />;
-      case "employees": return <OwnerEmployees />;
-      case "customers": return <OwnerCustomers />;
-      case "reports": return <OwnerReports />;
-      case "settings": return <OwnerSettings />;
-      case "chat": return <ChatRoom roomId="owner_general" myId="owner" myName="Chủ tiệm" partnerName="Nhân viên & Khách" />;
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'dashboard': return <OwnerDashboard />;
+      case 'appointments': return <OwnerAppointmentManager />;
+      case 'customers': return <OwnerCustomers />;
+      case 'inventory': return <OwnerInventory />;
+      case 'finance': return <OwnerFinance />;
+      case 'reports': return <OwnerReports />;
+      case 'employees': return <OwnerEmployees />;
+      case 'packages': return <OwnerPackages />;
+      case 'reminders': return <OwnerReminders />;
+      case 'settings': return <OwnerSettings />;
+      case 'chat': return <ChatRoom currentUser="owner" />;
       default: return <OwnerDashboard />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f6f9]">
+    <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
-      <div className="bg-white border-b px-4 py-3 flex justify-between items-center">
+      <div className="bg-purple-700 text-white p-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🌸</span>
           <div>
-            <span className="font-bold text-xl">BloomSpa</span>
-            <span className="text-xs text-gray-400 block -mt-1">Chủ tiệm</span>
+            <div className="font-bold">BloomSpa</div>
+            <div className="text-xs opacity-75">Chủ tiệm</div>
           </div>
         </div>
-        <button onClick={onLogout} className="text-red-500 text-sm font-medium">Đăng xuất</button>
+        <button className="text-white/80 hover:text-white">Đăng xuất</button>
       </div>
 
       {/* Main content */}
-      <div className="pb-24">
-        {renderPage()}
+      <div className="min-h-[calc(100vh-64px)]">
+        {renderContent()}
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t max-w-[480px] mx-auto">
-        <div className="grid grid-cols-5 text-xs">
-          <button onClick={() => setPage("dashboard")} className={`py-3 ${page === "dashboard" ? "text-[#7c5cbf]" : "text-gray-400"}`}>🏠</button>
-          <button onClick={() => setPage("appointments")} className={`py-3 ${page === "appointments" ? "text-[#7c5cbf]" : "text-gray-400"}`}>📅</button>
-          <button onClick={() => setPage("customers")} className={`py-3 ${page === "customers" ? "text-[#7c5cbf]" : "text-gray-400"}`}>👥</button>
-          <button onClick={() => setPage("chat")} className={`py-3 ${page === "chat" ? "text-[#7c5cbf]" : "text-gray-400"}`}>💬</button>
-          <button onClick={() => setPage("settings")} className={`py-3 ${page === "settings" ? "text-[#7c5cbf]" : "text-gray-400"}`}>⚙️</button>
-        </div>
-</div>
+      {/* Bottom navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg grid grid-cols-5 text-xs py-2">
+        <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center ${activeTab === 'dashboard' ? 'text-purple-600' : 'text-gray-400'}`}>
+          📊<span className="mt-1">Dashboard</span>
+        </button>
+        <button onClick={() => setActiveTab('appointments')} className={`flex flex-col items-center ${activeTab === 'appointments' ? 'text-purple-600' : 'text-gray-400'}`}>
+          📅<span className="mt-1">Lịch hẹn</span>
+        </button>
+        <button onClick={() => setActiveTab('customers')} className={`flex flex-col items-center ${activeTab === 'customers' ? 'text-purple-600' : 'text-gray-400'}`}>
+          👥<span className="mt-1">Khách</span>
+        </button>
+        <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center ${activeTab === 'chat' ? 'text-purple-600' : 'text-gray-400'}`}>
+💬<span className="mt-1">Chat</span>
+        </button>
+        <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center ${activeTab === 'settings' ? 'text-purple-600' : 'text-gray-400'}`}>
+          ⚙️<span className="mt-1">Cài đặt</span>
+        </button>
+      </div>
     </div>
   );
 }
-
-export default OwnerApp;
