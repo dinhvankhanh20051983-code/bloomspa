@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './lib/supabaseClient';
+import { supabase } from './lib/supabaseClient.js';
 
 import RoleSelect from './components/RoleSelect';
 import LoginOwner from './components/LoginOwner';
