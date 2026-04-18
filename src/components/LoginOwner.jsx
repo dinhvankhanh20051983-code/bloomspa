@@ -22,7 +22,7 @@ export default function LoginOwner({ onLoginSuccess }) {
       localStorage.setItem('bloomspa_user', JSON.stringify(userData));
       onLoginSuccess(userData);
     } else {
-      alert('Số điện thoại hoặc PIN sai!\n\nDemo đúng:\nSĐT: 0933251983\nPIN: @Hung05201983');
+      alert('Số điện thoại hoặc PIN sai!\n\nDemo đúng:\nSĐT: hỏi chủ tiệm\nPIN: hỏi chủ ');
     }
     setLoading(false);
   };
@@ -44,7 +44,7 @@ export default function LoginOwner({ onLoginSuccess }) {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="0933251983"
+                placeholder="hỏi chủ tiệm"
                 className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-3xl focus:outline-none focus:border-purple-400 text-lg"
                 required
               />
@@ -59,7 +59,7 @@ export default function LoginOwner({ onLoginSuccess }) {
                 type="password"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
-                placeholder="@Hung05201983"
+                placeholder="hỏi chủ tiệm"
                 className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-3xl focus:outline-none focus:border-purple-400 text-lg"
                 required
               />
