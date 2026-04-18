@@ -12,29 +12,27 @@ export default function LoginOwner({ onLoginSuccess }) {
     e.preventDefault();
     setLoading(true);
 
-    // Thông tin đăng nhập Chủ tiệm (không lộ mật khẩu)
-    const correctPhone = '0933251983';
-    const correctPin = '@Hung05201983';
+    const inputPhone = phone.trim();
+    const inputPin = pin.trim();
 
-    try {
-      if (phone === correctPhone && pin === correctPin) {
-        const userData = {
-          id: 1,
-          role: 'owner',
-          name: 'Chủ tiệm BloomSpa',
-          phone: phone
-        };
-        localStorage.setItem('bloomspa_user', JSON.stringify(userData));
-        onLoginSuccess(userData);
-      } else {
-        alert('Số điện thoại hoặc PIN sai!');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Có lỗi xảy ra khi đăng nhập');
-    } finally {
-      setLoading(false);
+    console.log('Đang thử đăng nhập với:', { phone: inputPhone, pin: inputPin });
+
+    // Thông tin đăng nhập Chủ tiệm
+    if (inputPhone === '0933251983' && inputPin === '@Hung05201983') {
+      const userData = {
+        id: 1,
+        role: 'owner',
+        name: 'Chủ tiệm BloomSpa',
+        phone: inputPhone
+      };
+      localStorage.setItem('bloomspa_user', JSON.stringify(userData));
+      console.log('Đăng nhập thành công!');
+      onLoginSuccess(userData);
+    } else {
+      alert('Số điện thoại hoặc PIN sai!');
     }
+
+    setLoading(false);
   };
 
   return (
@@ -74,8 +72,8 @@ export default function LoginOwner({ onLoginSuccess }) {
                 required
               />
               <button
-type="button"
-                onClick={() => setShowPin(!showPin)}
+                type="button"
+onClick={() => setShowPin(!showPin)}
                 className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
               >
                 {showPin ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
