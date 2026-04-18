@@ -11,6 +11,7 @@ export default function LoginOwner({ onLoginSuccess }) {
     e.preventDefault();
     setLoading(true);
 
+    // Thông tin đăng nhập Chủ tiệm (đã cập nhật theo yêu cầu)
     if (phone === '0933251983' && pin === '@Hung05201983') {
       const userData = {
         id: 1,
@@ -21,7 +22,7 @@ export default function LoginOwner({ onLoginSuccess }) {
       localStorage.setItem('bloomspa_user', JSON.stringify(userData));
       onLoginSuccess(userData);
     } else {
-      alert('Số điện thoại hoặc PIN sai!\nDemo: hỏi chủ tiệm / hỏi chủ tiệm');
+      alert('Số điện thoại hoặc PIN sai!\n\nDemo đúng:\nSĐT: 0933251983\nPIN: @Hung05201983');
     }
     setLoading(false);
   };
@@ -43,7 +44,7 @@ export default function LoginOwner({ onLoginSuccess }) {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="0987654321"
+                placeholder="0933251983"
                 className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-3xl focus:outline-none focus:border-purple-400 text-lg"
                 required
               />
@@ -51,12 +52,11 @@ export default function LoginOwner({ onLoginSuccess }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">PIN (10 ký tự)</label>
+            <label className="block text-sm font-medium text-gray-600 mb-2">PIN / Password</label>
             <div className="relative">
               <Lock className="absolute left-4 top-4 text-gray-400" />
               <input
                 type="password"
-                maxLength={10}
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="@Hung05201983"
@@ -71,11 +71,12 @@ export default function LoginOwner({ onLoginSuccess }) {
             disabled={loading}
             className="w-full py-5 bg-purple-600 hover:bg-purple-700 text-white text-lg font-medium rounded-3xl transition"
           >
-            {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+{loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
-<p className="text-center text-xs text-gray-400 mt-8">
-          Demo: hỏi chủ tiệm / hỏi chủ tiệm
+
+        <p className="text-center text-xs text-gray-400 mt-8">
+          Demo:  0987654321 / 1234
         </p>
       </div>
     </div>
