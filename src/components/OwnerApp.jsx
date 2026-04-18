@@ -6,7 +6,7 @@ import OwnerInventory from './OwnerInventory';
 import OwnerFinance from './OwnerFinance';
 import OwnerReports from './OwnerReports';
 import OwnerEmployees from './OwnerEmployees';
-import OwnerPackages from './OwnerPackages';
+import OwnerPackages from './OwnerPackages';     // ← Thêm dòng này
 import OwnerSettings from './OwnerSettings';
 import OwnerReminders from './OwnerReminders';
 import ChatRoom from './ChatRoom';
@@ -23,7 +23,7 @@ export default function OwnerApp() {
       case 'finance': return <OwnerFinance />;
       case 'reports': return <OwnerReports />;
       case 'employees': return <OwnerEmployees />;
-      case 'packages': return <OwnerPackages />;
+      case 'packages': return <OwnerPackages />;     // ← Thêm dòng này
       case 'reminders': return <OwnerReminders />;
       case 'settings': return <OwnerSettings />;
       case 'chat': return <ChatRoom currentUser="owner" />;
@@ -45,28 +45,18 @@ export default function OwnerApp() {
         <button className="text-white/80 hover:text-white">Đăng xuất</button>
       </div>
 
-      {/* Main content */}
+      {/* Nội dung chính */}
       <div className="min-h-[calc(100vh-64px)]">
         {renderContent()}
       </div>
 
       {/* Bottom navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg grid grid-cols-5 text-xs py-2">
-        <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center ${activeTab === 'dashboard' ? 'text-purple-600' : 'text-gray-400'}`}>
-          📊<span className="mt-1">Dashboard</span>
-        </button>
-        <button onClick={() => setActiveTab('appointments')} className={`flex flex-col items-center ${activeTab === 'appointments' ? 'text-purple-600' : 'text-gray-400'}`}>
-          📅<span className="mt-1">Lịch hẹn</span>
-        </button>
-        <button onClick={() => setActiveTab('customers')} className={`flex flex-col items-center ${activeTab === 'customers' ? 'text-purple-600' : 'text-gray-400'}`}>
-          👥<span className="mt-1">Khách</span>
-        </button>
-        <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center ${activeTab === 'chat' ? 'text-purple-600' : 'text-gray-400'}`}>
-💬<span className="mt-1">Chat</span>
-        </button>
-        <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center ${activeTab === 'settings' ? 'text-purple-600' : 'text-gray-400'}`}>
-          ⚙️<span className="mt-1">Cài đặt</span>
-        </button>
+        <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center ${activeTab === 'dashboard' ? 'text-purple-600' : 'text-gray-400'}`}>📊<span className="mt-1">Dashboard</span></button>
+        <button onClick={() => setActiveTab('appointments')} className={`flex flex-col items-center ${activeTab === 'appointments' ? 'text-purple-600' : 'text-gray-400'}`}>📅<span className="mt-1">Lịch hẹn</span></button>
+        <button onClick={() => setActiveTab('customers')} className={`flex flex-col items-center ${activeTab === 'customers' ? 'text-purple-600' : 'text-gray-400'}`}>👥<span className="mt-1">Khách</span></button>
+<button onClick={() => setActiveTab('packages')} className={`flex flex-col items-center ${activeTab === 'packages' ? 'text-purple-600' : 'text-gray-400'}`}>📦<span className="mt-1">Gói DV</span></button>
+        <button onClick={() => setActiveTab('chat')} className={`flex flex-col items-center ${activeTab === 'chat' ? 'text-purple-600' : 'text-gray-400'}`}>💬<span className="mt-1">Chat</span></button>
       </div>
     </div>
   );
